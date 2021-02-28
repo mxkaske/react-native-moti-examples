@@ -1,25 +1,30 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import React, { useEffect, useState } from "react";
+import { View as MotiView, Text as MotiText } from "moti";
+
+const SIZE = 45;
+const SPACING = 6;
 
 export default function AnimatedStyleUpdateExample() {
   const [value, setValue] = useState(new Date());
 
   useEffect(() => {
     const interval = setInterval(() => setValue(new Date()), 1000);
-
     return () => {
       clearInterval(interval);
     };
   }, []);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: "#F3F4F6" }}>
       <View style={{ flex: 1 }} />
       <View style={s.container}>
-        <Numbers value={Math.floor(value.getHours() / 8)} maxValue={3} />
+        <Numbers value={Math.floor(value.getHours() / 10)} maxValue={3} />
         <Numbers value={value.getHours() % 10} maxValue={10} />
+        <View style={{ width: SPACING * 2 }} />
         <Numbers value={Math.floor(value.getMinutes() / 10)} maxValue={6} />
         <Numbers value={value.getMinutes() % 10} maxValue={10} />
+        <View style={{ width: SPACING * 2 }} />
         <Numbers value={Math.floor(value.getSeconds() / 10)} maxValue={6} />
         <Numbers value={value.getSeconds() % 10} maxValue={10} />
       </View>
@@ -32,28 +37,42 @@ interface NumbersProps {
   maxValue: number;
 }
 
-const Numbers = ({ value, maxValue }: NumbersProps) => {
+const Numbers = React.memo(({ value, maxValue }: NumbersProps) => {
   return (
-    <View style={[s.innerContainer, s.shadow]}>
-      <View style={[s.circle, s.shadow]} />
-      {Array(maxValue)
-        .fill(0)
-        .map((_, i) => {
-          const active = i === value;
-          return (
-            <View style={s.numberContainer}>
-              <Text key={i} style={[s.number, active && s.active]}>
-                {i}
-              </Text>
-            </View>
-          );
-        })}
+    <View>
+      <MotiView
+        animate={{ translateY: -value * SIZE }}
+        style={[s.innerContainer, s.shadow]}
+        transition={{ type: "timing", duration: 300 }}
+      >
+        {Array(maxValue)
+          .fill(0)
+          .map((_, i) => {
+            const active = i === value;
+            return (
+              <View key={i} style={s.numberContainer}>
+                <MotiText
+                  animate={{
+                    scale: active ? 1.4 : 1,
+                    // @ts-ignore
+                    color: active ? "#FFFFFF" : "#9CA3AF",
+                  }}
+                  transition={{ type: "timing", duration: 300 }}
+                >
+                  {i}
+                </MotiText>
+              </View>
+            );
+          })}
+      </MotiView>
+      <MotiView
+        style={[s.circle, s.shadow]}
+        animate={{ scale: [0.6, 1.1] }}
+        transition={{ type: "timing", duration: 150 }}
+      />
     </View>
   );
-};
-
-const SPACING = 8;
-const DIAMETER = SPACING * 6;
+});
 
 const s = StyleSheet.create({
   container: {
@@ -64,39 +83,32 @@ const s = StyleSheet.create({
   },
   innerContainer: {
     backgroundColor: "#4B5563",
-    borderRadius: DIAMETER / 2,
+    borderRadius: SIZE / 2,
     marginHorizontal: SPACING,
   },
   numberContainer: {
-    width: DIAMETER,
-    height: DIAMETER,
+    width: SIZE,
+    height: SIZE,
     justifyContent: "center",
     alignItems: "center",
-  },
-  number: {
-    color: "black",
-  },
-  active: {
-    color: "white",
   },
   circle: {
     position: "absolute",
     alignSelf: "center",
-    backgroundColor: "black",
-    opacity: 0.4,
-    width: DIAMETER,
-    height: DIAMETER,
-    borderRadius: DIAMETER / 2,
-    transform: [{ scale: 1.2 }],
+    backgroundColor: "#1F2937",
+    opacity: 0.3,
+    width: SIZE,
+    height: SIZE,
+    borderRadius: SIZE / 2,
   },
   shadow: {
-    shadowColor: "#000",
+    shadowColor: "black",
     shadowOffset: {
       width: 0,
-      height: 8,
+      height: 5,
     },
-    shadowOpacity: 0.44,
-    shadowRadius: 10.32,
-    elevation: 16,
+    shadowOpacity: 0.34,
+    shadowRadius: 6.27,
+    elevation: 10,
   },
 });
